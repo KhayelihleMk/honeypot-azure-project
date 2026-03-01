@@ -1,1 +1,27 @@
+KQL Detection Queries – Honeypot Azure Lab
 
+1. Detect Failed Logins (Event ID 4625)
+SecurityEvent
+| where EventID == 4625
+
+2. Summarize Failed Attempts by Account and Computer (5-minute window)
+SecurityEvent
+| where EventID == 4625
+| summarize FailedAttempts = count() by Account, Computer, bin(TimeGenerated, 5m)
+| where FailedAttempts >= 3
+
+## 3. Enrich Failed Logins with GeoIP Data from Watchlist
+let GeoIPDB_FULL = _GetWatchlist("geoip");
+let WindowsEvents = SecurityEvent
+    | where EventID == 4625
+    | order by TimeGenerated desc
+    | evaluate ipv4_lookup(GeoIPDB_FULL, IpAddress, network);
+WindowsEvents
+
+4. Example: Query Specific Attacker IP
+let GeoIPDB_FULL = _GetWatchlist("geoip");
+SecurityEvent
+| where IpAddress == "<attacker IP address>"
+| where EventID == 4625
+| order by TimeGenerated desc
+| evaluate ipv4_lookup(GeoIPDB_FULL, IpAddress, network)
