@@ -10,7 +10,7 @@ SecurityEvent
 | summarize FailedAttempts = count() by Account, Computer, bin(TimeGenerated, 5m)
 | where FailedAttempts >= 3
 
-## 3. Enrich Failed Logins with GeoIP Data from Watchlist
+3. Enrich Failed Logins with GeoIP Data from Watchlist
 let GeoIPDB_FULL = _GetWatchlist("geoip");
 let WindowsEvents = SecurityEvent
     | where EventID == 4625
